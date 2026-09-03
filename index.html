@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#070a11" />
+  
+  <!-- Progressive Web App (PWA) Meta & Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TreasureLens" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <title>TreasureLens AR • AI Campus Scavenger Hunt</title>
+
+  <!-- Google Fonts for Adventure Aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- TensorFlow.js & MobileNet Neural Feature Extractor for Real-Time Background AI -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+
+  <!-- Confetti library for Victory Screen -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Main App Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🧭</span>
+        <div class="brand-text-col">
+          <span class="brand-name">TreasureLens</span>
+          <span class="brand-sub">AI VISION AR</span>
+        </div>
+      </div>
+      
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button id="btn-install-pwa" class="btn-install-app" style="display: none;">
+          <span>📲</span> Install App
+        </button>
+
+        <nav class="header-nav">
+          <button id="nav-play-btn" class="nav-tab active">
+            <span>📷</span> Hunt
+          </button>
+          <button id="nav-create-btn" class="nav-tab">
+            <span>🛡️</span> Admin
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- iOS "Add to Home Screen" Instructions Banner -->
+    <div id="ios-install-banner" class="ios-install-banner" style="display: none;">
+      <span>💡 To install as an app: tap <strong>Share ⎋</strong> and select <strong>"Add to Home Screen ⊞"</strong></span>
+      <button id="btn-dismiss-ios" class="dismiss-banner-btn">✕</button>
+    </div>
+
+    <!-- Main Dynamic View Container -->
+    <main id="view-container" class="view-container">
+      <!-- Injected dynamically by main.js -->
+    </main>
+  </div>
+
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
+
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('btn-install-pwa');
+    const iosBanner = document.getElementById('ios-install-banner');
+    const dismissIosBtn = document.getElementById('btn-dismiss-ios');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) installBtn.style.display = 'inline-flex';
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            installBtn.style.display = 'none';
+          }
+          deferredPrompt = null;
+        }
+      });
+    }
+
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+    if (isIos && !isStandalone && iosBanner) {
+      if (!sessionStorage.getItem('ios_banner_dismissed')) {
+        iosBanner.style.display = 'flex';
+      }
+      if (dismissIosBtn) {
+        dismissIosBtn.addEventListener('click', () => {
+          iosBanner.style.display = 'none';
+          sessionStorage.setItem('ios_banner_dismissed', 'true');
+        });
+      }
+    }
+  </script>
+
+  <!-- Main App ES Module Entrypoint -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

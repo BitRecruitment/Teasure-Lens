@@ -1,0 +1,26 @@
+[
+  {
+    "studentId": "std_1y8u917_mtlsd2xf",
+    "name": "Mashrafi",
+    "cluesCompleted": 0,
+    "totalClues": 2,
+    "finished": true,
+    "startTime": "11:15:40 PM",
+    "lastActive": "11:29:45 PM",
+    "finishTime": "11:17:09 PM",
+    "finishTimestamp": 1788455829.5686302,
+    "elapsedSeconds": 100
+  },
+  {
+    "studentId": "std_99n0hj1_mtlt1z4l",
+    "name": "Mashrafi",
+    "cluesCompleted": 1,
+    "totalClues": 2,
+    "finished": true,
+    "startTime": "11:35:15 PM",
+    "lastActive": "11:41:13 PM",
+    "finishTime": "11:35:56 PM",
+    "finishTimestamp": 1788456956.7381787,
+    "elapsedSeconds": 65
+  }
+]

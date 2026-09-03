@@ -1,0 +1,2 @@
+# TreasureLens AR Cloud Requirements
+# Pure Python 3 standard library - no external packages required!
