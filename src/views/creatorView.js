@@ -13,7 +13,9 @@ export class CreatorView {
     this.leaderboardInterval = null;
   }
 
-  mount() {
+  async mount() {
+    await gameState.fetchLiveHunt();
+    this.huntClues = JSON.parse(JSON.stringify(gameState.hunt.clues || []));
     const studentUrl = gameState.getStudentPermanentUrl();
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=${encodeURIComponent(studentUrl)}`;
 
@@ -342,6 +344,34 @@ export class CreatorView {
     reader.readAsDataURL(file);
   }
 
+  async broadcastHunt(silent = false) {
+    const feedbackBanner = document.getElementById('publish-feedback-banner');
+    const feedbackText = document.getElementById('publish-feedback-text');
+
+    const newHunt = {
+      id: "live-hunt-" + Date.now(),
+      title: "Campus Visual Scavenger Hunt",
+      description: "Find spotted landmarks with your phone camera!",
+      clues: this.huntClues.map((c, i) => ({ ...c, number: i + 1 }))
+    };
+
+    const result = await gameState.publishHuntToServer(newHunt);
+
+    if (feedbackBanner && feedbackText) {
+      feedbackBanner.style.display = 'flex';
+      if (result.success) {
+        if (!silent) soundFX.playMatchSuccess();
+        feedbackText.textContent = `✅ LIVE! Saved & Broadcasted to all student apps (${newHunt.clues.length} landmarks)!`;
+        feedbackBanner.style.borderColor = '#10b981';
+      } else {
+        feedbackText.textContent = `⚠️ Server notice: ${result.error || result.message}`;
+        feedbackBanner.style.borderColor = '#f59e0b';
+      }
+      setTimeout(() => { if (feedbackBanner) feedbackBanner.style.display = 'none'; }, 4500);
+    }
+    return result;
+  }
+
   renderClueList() {
     const listEl = document.getElementById('clues-container');
     const countEl = document.getElementById('clue-count');
@@ -370,10 +400,11 @@ export class CreatorView {
     `).join('');
 
     listEl.querySelectorAll('.clue-chip-del').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const idx = parseInt(e.currentTarget.getAttribute('data-del-idx'), 10);
         this.huntClues.splice(idx, 1);
         this.renderClueList();
+        await this.broadcastHunt();
       });
     });
   }
@@ -501,9 +532,9 @@ export class CreatorView {
       });
     }
 
-    // Add Landmark
+    // Add Landmark (Auto-Saves & Broadcasts Immediately!)
     if (btnAddClue) {
-      btnAddClue.addEventListener('click', () => {
+      btnAddClue.addEventListener('click', async () => {
         const riddleText = document.getElementById('input-riddle').value.trim();
         const hintText = document.getElementById('input-hint').value.trim();
         const photoLabel = document.getElementById('input-photo-label').value.trim();
@@ -545,10 +576,17 @@ export class CreatorView {
         if (placeholder) placeholder.style.display = 'flex';
 
         this.renderClueList();
+
+        // Automatically Save & Broadcast live to all students!
+        btnAddClue.disabled = true;
+        btnAddClue.innerHTML = `<span>⏳</span> Uploading to Cloud...`;
+        await this.broadcastHunt();
+        btnAddClue.disabled = false;
+        btnAddClue.innerHTML = `<span>➕</span> Add Landmark to Hunt`;
       });
     }
 
-    // Broadcast to students
+    // Manual Broadcast button
     if (btnPublish) {
       btnPublish.addEventListener('click', async () => {
         soundFX.playClick();
@@ -559,31 +597,9 @@ export class CreatorView {
 
         btnPublish.disabled = true;
         btnPublish.innerHTML = `<span>⏳</span> Broadcasting to server...`;
-
-        const newHunt = {
-          id: "live-hunt-" + Date.now(),
-          title: "Campus Visual Scavenger Hunt",
-          description: "Find spotted landmarks with your phone camera!",
-          clues: this.huntClues.map((c, i) => ({ ...c, number: i + 1 }))
-        };
-
-        const result = await gameState.publishHuntToServer(newHunt);
-
+        await this.broadcastHunt();
         btnPublish.disabled = false;
         btnPublish.innerHTML = `<span>📡</span> Save & Broadcast Live to Students`;
-
-        if (feedbackBanner && feedbackText) {
-          feedbackBanner.style.display = 'flex';
-          if (result.success) {
-            soundFX.playMatchSuccess();
-            feedbackText.textContent = `✅ LIVE! All student apps now updated to ${newHunt.clues.length} landmarks!`;
-            feedbackBanner.style.borderColor = '#10b981';
-          } else {
-            feedbackText.textContent = `⚠️ Error: ${result.error}`;
-            feedbackBanner.style.borderColor = '#ef4444';
-          }
-          setTimeout(() => { feedbackBanner.style.display = 'none'; }, 4500);
-        }
       });
     }
   }
