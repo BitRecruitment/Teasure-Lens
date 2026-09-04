@@ -140,7 +140,16 @@ class GameState {
       this.adminPassword = savedPass;
     }
 
-    this.hunt = JSON.parse(JSON.stringify(DEFAULT_HUNT));
+    const savedHunt = localStorage.getItem('treasurelens_active_hunt');
+    if (savedHunt) {
+      try {
+        this.hunt = JSON.parse(savedHunt);
+      } catch (e) {
+        this.hunt = JSON.parse(JSON.stringify(DEFAULT_HUNT));
+      }
+    } else {
+      this.hunt = JSON.parse(JSON.stringify(DEFAULT_HUNT));
+    }
 
     const savedProgress = localStorage.getItem('treasurelens_progress_current');
     if (savedProgress) {
@@ -187,7 +196,10 @@ class GameState {
 
   async fetchLiveHunt() {
     try {
-      const res = await fetch('/api/hunt', { cache: 'no-store' });
+      let res = await fetch('/api/hunt', { cache: 'no-store' });
+      if (!res.ok) {
+        res = await fetch('./hunt_data.json', { cache: 'no-store' });
+      }
       if (res.ok) {
         const data = await res.json();
         if (data && data.clues && data.clues.length > 0) {
@@ -196,6 +208,7 @@ class GameState {
 
           if (isDifferent) {
             this.hunt = data;
+            localStorage.setItem('treasurelens_active_hunt', JSON.stringify(data));
             if (prevCount > 0 && data.clues.length > prevCount) {
               this.notifyHuntChanged(data.clues.length);
             }
