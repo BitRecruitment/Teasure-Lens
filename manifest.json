@@ -2,7 +2,7 @@
   "name": "TreasureLens AR • Campus Scavenger Hunt",
   "short_name": "TreasureLens",
   "description": "Visual Camera AR Scavenger Hunt for Students",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#070a11",
   "theme_color": "#070a11",
