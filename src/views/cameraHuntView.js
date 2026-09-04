@@ -1,4 +1,5 @@
-// Pure Live-Camera Hunt View: Production Ready (No Test Buttons, Riddle-Only Exploration)
+// Professional Live-Camera AR Expedition View
+// Continuous camera streaming between riddles, instant sensor reset, & professional UI
 import { CameraManager } from '../ar/camera.js';
 import { ARDigScene } from '../ar/scene.js';
 import { visualMatcher } from '../vision/matcher.js';
@@ -15,6 +16,7 @@ export class CameraHuntView {
     this.currentClue = null;
     this.isLockedOn = false;
     this.unsubscribeHunt = null;
+    this.domElements = {};
   }
 
   async mount() {
@@ -23,7 +25,7 @@ export class CameraHuntView {
     const hasPhoto = Boolean(this.currentClue && this.currentClue.photoUrl);
     const hasName = Boolean(gameState.studentName);
 
-    // AI Vision loads reference photo silently in background (invisible to student)
+    // AI Vision loads reference photo silently in background
     if (hasPhoto) {
       visualMatcher.loadReferenceImage(this.currentClue.photoUrl);
     }
@@ -31,69 +33,69 @@ export class CameraHuntView {
     this.container.innerHTML = `
       <div class="camera-hunt-view">
         <!-- Live Video Camera Feed -->
-        <video id="live-camera-feed" class="ar-video-feed" playsinline muted autoplay></video>
+        <video id="live-camera-feed" class="ar-video-feed" playsinline webkit-playsinline muted autoplay></video>
 
         <!-- Three.js 3D WebGL Overlay Canvas -->
         <canvas id="live-ar-canvas" class="ar-canvas" style="opacity: 0.15;"></canvas>
 
-        <!-- Live Teacher Update Toast -->
+        <!-- Dynamic Floating Notifications (Admin updates & Calibrations) -->
         <div id="live-update-toast" class="live-update-toast" style="display: none;">
           <span class="pulse-dot"></span>
-          <span id="live-toast-text">📢 Expedition updated by admin!</span>
+          <span id="live-toast-text">Expedition updated</span>
         </div>
 
-        <!-- Student Name Prompt Modal -->
+        <!-- Student Name Registration Modal -->
         <div id="student-name-modal" class="reward-modal-backdrop" style="display: ${hasName ? 'none' : 'flex'};">
-          <div class="reward-card" style="max-width: 350px;">
-            <div style="font-size: 2.5rem; margin-bottom: 8px;">🧭</div>
-            <h2 class="reward-title" style="font-size: 1.3rem;">Join Expedition</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-              Enter your name or team name so your teacher can see who completes the hunt first!
+          <div class="reward-card">
+            <div class="reward-icon-burst">🧭</div>
+            <h2 class="reward-title">Expedition Registry</h2>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+              Enter your explorer or team name to record your finish time on the official leaderboard.
             </p>
 
-            <div class="form-group" style="text-align: left; margin-bottom: 16px;">
-              <input id="input-student-name" class="form-input" type="text" placeholder="e.g. Alex M. or Team Falcon" maxlength="30" />
+            <div class="form-group" style="text-align: left; margin-bottom: 18px;">
+              <input id="input-student-name" class="form-input" type="text" placeholder="e.g. Alex M. or Team Falcon" maxlength="30" autocomplete="off" />
             </div>
 
-            <button id="btn-start-with-name" class="btn-primary" style="width: 100%; padding: 14px;">
-              <span>🚀</span> Start Scavenger Hunt
+            <button id="btn-start-with-name" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1rem;">
+              <span>🚀</span> Begin Expedition
             </button>
           </div>
         </div>
 
-        <!-- Tactical HUD Overlay (Riddle-Driven Only) -->
+        <!-- Professional Tactical HUD Overlay -->
         <div class="camera-hud-container">
-          <!-- Top Row: Riddle Card (No Photo Guide) -->
-          <div class="hunt-top-bar" style="width: 100%;">
-            <div class="riddle-tactical-card" style="width: 100%;">
+          <!-- Top Dock: High-Contrast Riddle Tactical Card -->
+          <div class="hunt-top-bar">
+            <div class="riddle-tactical-card">
               <div class="riddle-top-meta">
                 <span class="badge-tag" id="badge-clue-counter">Riddle ${this.currentClue.number} of ${totalClues}</span>
-                <button type="button" id="btn-player-name-tag" class="riddle-audio-status" style="background: transparent; border: none; cursor: pointer;">
+                <button type="button" id="btn-player-name-tag" class="riddle-audio-status" aria-label="Edit Name">
                   <span class="pulse-dot-cyan"></span>
                   <span id="label-player-name">${gameState.studentName || 'Explorer'} ✎</span>
                 </button>
               </div>
 
-              <div class="riddle-text-sm" style="font-size: 1rem; line-height: 1.5; margin: 4px 0;">
+              <div id="riddle-text-display" class="riddle-text-sm">
                 "${this.currentClue.riddle}"
               </div>
 
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+              <div class="riddle-card-footer">
                 ${this.currentClue.hint ? `
                   <button type="button" id="btn-toggle-hint" class="hint-mini-btn">💡 Show Hint</button>
                 ` : `<span></span>`}
-                <button type="button" id="btn-toggle-sens" class="hint-mini-btn" style="color: #38bdf8;">
-                  ⚙️ Mode: <span id="label-sens-mode">Lenient</span>
+                <button type="button" id="btn-toggle-sens" class="hint-mini-btn sens-pill">
+                  ⚙️ Mode: <strong id="label-sens-mode">Lenient</strong>
                 </button>
               </div>
 
-              <span id="hint-text-box" class="hint-text-collapsed" style="display: none; margin-top: 6px;">
+              <div id="hint-text-box" class="hint-text-collapsed" style="display: none;">
                 ${this.currentClue.hint || ''}
-              </span>
+              </div>
             </div>
           </div>
 
-          <!-- Center Optical Reticle -->
+          <!-- Center Optical Reticle with Target Indicator -->
           <div id="optical-reticle" class="optical-reticle-box">
             <div class="bracket-top-left"></div>
             <div class="bracket-top-right"></div>
@@ -105,16 +107,17 @@ export class CameraHuntView {
             </div>
           </div>
 
-          <!-- Prominent "I'M HERE! SCAN LANDMARK" Action Button -->
-          <div style="align-self: center; width: 100%; max-width: 280px; text-align: center; margin-top: -10px;">
-            <button id="btn-instant-scan-target" class="btn-primary" style="width: 100%; padding: 13px 16px; font-size: 0.95rem; border-radius: 30px; box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); background: linear-gradient(135deg, #f59e0b, #ea580c);">
-              <span>🎯</span> I'M HERE! SCAN LANDMARK
+          <!-- Primary Scan Action Trigger -->
+          <div class="scan-action-wrapper">
+            <button id="btn-instant-scan-target" class="btn-scan-action">
+              <span class="scan-btn-icon">🎯</span>
+              <span class="scan-btn-label">SCAN LANDMARK</span>
             </button>
           </div>
 
-          <!-- Bottom Tactical HUD -->
+          <!-- Bottom Control Dock: Signal Meter, Shovel, & Dedicated Lower Reset Button -->
           <div class="hunt-bottom-bar">
-            <!-- Signal Meter -->
+            <!-- Real-Time Signal Meter -->
             <div class="signal-meter-card">
               <div class="signal-meter-header">
                 <div class="signal-label-group">
@@ -125,15 +128,15 @@ export class CameraHuntView {
               </div>
 
               <div class="signal-meter-track">
-                <div id="signal-meter-fill" class="signal-meter-fill" style="width: 10%;"></div>
+                <div id="signal-meter-fill" class="signal-meter-fill" style="width: 8%;"></div>
               </div>
 
               <div class="signal-meter-sub">
-                <span>Solve the riddle, aim camera at the spot, or tap "SCAN LANDMARK"</span>
+                <span>Aim camera at the landmark or tap "SCAN LANDMARK"</span>
               </div>
             </div>
 
-            <!-- Shovel Excavation Panel -->
+            <!-- Shovel Excavation Panel (Unlocked on Landmark Match) -->
             <div id="shovel-excavation-panel" class="shovel-action-panel" style="display: none;">
               <div class="dig-progress-box">
                 <div class="dig-progress-label">
@@ -149,17 +152,25 @@ export class CameraHuntView {
                 ⛏️
               </button>
             </div>
+
+            <!-- Dedicated Lower Reset Button (Camera Stalls / Sensor Calibrations) -->
+            <div class="lower-reset-container">
+              <button id="btn-reset-camera" class="btn-lower-reset" aria-label="Reset Camera and Sensors">
+                <span class="reset-icon">🔄</span>
+                <span>Reset Camera & Sensors</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Reward Modal -->
+        <!-- Reward Modal (Unlocking Next Riddle) -->
         <div id="hunt-reward-modal" class="reward-modal-backdrop" style="display: none;">
           <div class="reward-card">
             <div class="reward-icon-burst">👑</div>
             <h2 class="reward-title">Treasure Unearthed!</h2>
             <div id="hunt-reward-item" class="reward-secret-box">Ancient Treasure</div>
             <p id="hunt-reward-msg" class="reward-desc">Secret message goes here</p>
-            <button id="hunt-next-clue-btn" class="btn-primary" style="width: 100%;">
+            <button id="hunt-next-clue-btn" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1rem;">
               <span>Next Consecutive Riddle</span> ➔
             </button>
           </div>
@@ -167,38 +178,49 @@ export class CameraHuntView {
       </div>
     `;
 
-    // References
-    const videoEl = document.getElementById('live-camera-feed');
-    const canvasEl = document.getElementById('live-ar-canvas');
-    const reticleBox = document.getElementById('optical-reticle');
-    const reticleBadge = document.getElementById('reticle-signal-badge');
-    const signalStateText = document.getElementById('signal-state-text');
-    const signalPctText = document.getElementById('signal-pct-text');
-    const signalMeterFill = document.getElementById('signal-meter-fill');
-    const signalIcon = document.getElementById('signal-icon');
-    const shovelPanel = document.getElementById('shovel-excavation-panel');
-    const shovelBtn = document.getElementById('hunt-shovel-btn');
-    const digBar = document.getElementById('hunt-dig-bar');
-    const digPct = document.getElementById('hunt-dig-pct');
-    const btnToggleHint = document.getElementById('btn-toggle-hint');
-    const hintTextBox = document.getElementById('hint-text-box');
-    const btnToggleSens = document.getElementById('btn-toggle-sens');
-    const labelSensMode = document.getElementById('label-sens-mode');
-    const btnScanTarget = document.getElementById('btn-instant-scan-target');
-    const rewardModal = document.getElementById('hunt-reward-modal');
-    const rewardItem = document.getElementById('hunt-reward-item');
-    const rewardMsg = document.getElementById('hunt-reward-msg');
-    const rewardNextBtn = document.getElementById('hunt-next-clue-btn');
-    const liveToast = document.getElementById('live-update-toast');
-    const liveToastText = document.getElementById('live-toast-text');
-    const clueCounterBadge = document.getElementById('badge-clue-counter');
-    const nameModal = document.getElementById('student-name-modal');
-    const inputName = document.getElementById('input-student-name');
-    const btnStartWithName = document.getElementById('btn-start-with-name');
-    const btnPlayerNameTag = document.getElementById('btn-player-name-tag');
-    const labelPlayerName = document.getElementById('label-player-name');
+    // Cache DOM Elements
+    this.domElements = {
+      videoEl: document.getElementById('live-camera-feed'),
+      canvasEl: document.getElementById('live-ar-canvas'),
+      reticleBox: document.getElementById('optical-reticle'),
+      reticleBadge: document.getElementById('reticle-signal-badge'),
+      signalStateText: document.getElementById('signal-state-text'),
+      signalPctText: document.getElementById('signal-pct-text'),
+      signalMeterFill: document.getElementById('signal-meter-fill'),
+      signalIcon: document.getElementById('signal-icon'),
+      shovelPanel: document.getElementById('shovel-excavation-panel'),
+      shovelBtn: document.getElementById('hunt-shovel-btn'),
+      digBar: document.getElementById('hunt-dig-bar'),
+      digPct: document.getElementById('hunt-dig-pct'),
+      btnToggleHint: document.getElementById('btn-toggle-hint'),
+      hintTextBox: document.getElementById('hint-text-box'),
+      btnToggleSens: document.getElementById('btn-toggle-sens'),
+      labelSensMode: document.getElementById('label-sens-mode'),
+      btnScanTarget: document.getElementById('btn-instant-scan-target'),
+      btnResetCamera: document.getElementById('btn-reset-camera'),
+      rewardModal: document.getElementById('hunt-reward-modal'),
+      rewardItem: document.getElementById('hunt-reward-item'),
+      rewardMsg: document.getElementById('hunt-reward-msg'),
+      rewardNextBtn: document.getElementById('hunt-next-clue-btn'),
+      liveToast: document.getElementById('live-update-toast'),
+      liveToastText: document.getElementById('live-toast-text'),
+      clueCounterBadge: document.getElementById('badge-clue-counter'),
+      riddleTextDisplay: document.getElementById('riddle-text-display'),
+      nameModal: document.getElementById('student-name-modal'),
+      inputName: document.getElementById('input-student-name'),
+      btnStartWithName: document.getElementById('btn-start-with-name'),
+      btnPlayerNameTag: document.getElementById('btn-player-name-tag'),
+      labelPlayerName: document.getElementById('label-player-name')
+    };
 
-    // Name registration
+    const {
+      videoEl, canvasEl, shovelBtn,
+      btnToggleHint, hintTextBox, btnToggleSens, labelSensMode,
+      btnScanTarget, btnResetCamera, rewardNextBtn,
+      nameModal, inputName, btnStartWithName, btnPlayerNameTag, labelPlayerName
+    } = this.domElements;
+
+    // Student Name Handling
     const handleNameSubmit = () => {
       const name = inputName.value.trim();
       if (name) {
@@ -220,7 +242,7 @@ export class CameraHuntView {
 
     if (btnPlayerNameTag) {
       btnPlayerNameTag.addEventListener('click', () => {
-        const newName = prompt("Edit your name / team name:", gameState.studentName);
+        const newName = prompt("Edit your explorer / team name:", gameState.studentName);
         if (newName && newName.trim().length > 0) {
           gameState.setStudentName(newName.trim());
           if (labelPlayerName) labelPlayerName.textContent = `${newName.trim()} ✎`;
@@ -228,7 +250,7 @@ export class CameraHuntView {
       });
     }
 
-    // Toggle Sensitivity
+    // Toggle Sensitivity Mode
     if (btnToggleSens && labelSensMode) {
       const modes = ['lenient', 'balanced', 'strict'];
       let currentIdx = 0;
@@ -238,27 +260,24 @@ export class CameraHuntView {
         visualMatcher.setSensitivity(selected);
         labelSensMode.textContent = selected.charAt(0).toUpperCase() + selected.slice(1);
         soundFX.playClick();
+        this.showToast(`Mode switched to: ${selected.toUpperCase()}`);
       });
     }
 
-    // Initialize Camera & AR
+    // Initialize Camera Stream & Three.js AR Scene
     this.cameraManager = new CameraManager(videoEl);
     await this.cameraManager.start();
 
     this.arScene = new ARDigScene(canvasEl);
 
-    // Sync student progress
+    // Initial student progress sync
     gameState.submitStudentProgress(false);
 
-    // Live sync listener
+    // Live sync listener for teacher landmark updates
     this.unsubscribeHunt = gameState.onHuntChanged((newTotal) => {
-      if (liveToast && liveToastText) {
-        liveToastText.textContent = `📢 Admin added new locations! Total: ${newTotal}`;
-        liveToast.style.display = 'flex';
-        setTimeout(() => { liveToast.style.display = 'none'; }, 4000);
-      }
-      if (clueCounterBadge) {
-        clueCounterBadge.textContent = `Riddle ${this.currentClue.number} of ${newTotal}`;
+      this.showToast(`📢 Admin updated landmarks! Total: ${newTotal}`);
+      if (this.domElements.clueCounterBadge) {
+        this.domElements.clueCounterBadge.textContent = `Riddle ${this.currentClue.number} of ${newTotal}`;
       }
     });
 
@@ -271,42 +290,76 @@ export class CameraHuntView {
       });
     }
 
-    // Background Analysis Loop
-    this.startFrameAnalysisLoop(videoEl, {
-      canvasEl,
-      reticleBox,
-      reticleBadge,
-      signalStateText,
-      signalPctText,
-      signalMeterFill,
-      signalIcon,
-      shovelPanel
-    });
+    // Start Real-Time Background Frame Analysis Loop
+    this.startFrameAnalysisLoop(videoEl);
 
-    // 1-Tap "I'M HERE! SCAN LANDMARK" Button
+    // 1-Tap "SCAN LANDMARK" Button
     if (btnScanTarget) {
       btnScanTarget.addEventListener('click', async () => {
         soundFX.playClick();
         btnScanTarget.disabled = true;
-        btnScanTarget.innerHTML = `<span>⏳</span> Analyzing Landmark...`;
+        btnScanTarget.classList.add('scanning');
+        btnScanTarget.innerHTML = `<span class="scan-btn-icon spin">⏳</span><span class="scan-btn-label">ANALYZING SPOT...</span>`;
 
         const res = await visualMatcher.verifyInstantScan(videoEl);
 
         btnScanTarget.disabled = false;
-        btnScanTarget.innerHTML = `<span>🎯</span> I'M HERE! SCAN LANDMARK`;
+        btnScanTarget.classList.remove('scanning');
+        btnScanTarget.innerHTML = `<span class="scan-btn-icon">🎯</span><span class="scan-btn-label">SCAN LANDMARK</span>`;
 
         if (res.success || res.score >= 50) {
           visualMatcher.setManualBoost(95);
         } else {
-          reticleBadge.textContent = `⚠️ Match ${res.score}% - Aim camera closer to the spot!`;
-          if (navigator.vibrate) navigator.vibrate(100);
+          this.domElements.reticleBadge.textContent = `⚠️ Match ${res.score}% - Aim closer to the landmark!`;
+          if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
           setTimeout(() => {
-            reticleBadge.textContent = 'SCANNING ENVIRONMENT...';
+            if (!this.isLockedOn) {
+              this.domElements.reticleBadge.textContent = 'SCANNING ENVIRONMENT...';
+            }
           }, 2500);
         }
       });
     }
 
+    // Dedicated Lower Reset Button (Camera Stalls / Sensors Reset)
+    if (btnResetCamera) {
+      btnResetCamera.addEventListener('click', async () => {
+        soundFX.playClick();
+        if (navigator.vibrate) navigator.vibrate(35);
+
+        btnResetCamera.classList.add('rotating');
+        btnResetCamera.innerHTML = `<span class="reset-icon spin">🔄</span><span>Calibrating Sensors...</span>`;
+
+        // 1. Re-verify & restart camera stream if phone OS paused it
+        const cameraOk = await this.cameraManager.restart();
+
+        // 2. Reset excavation & visual states
+        this.isLockedOn = false;
+        canvasEl.style.opacity = '0.15';
+        this.domElements.shovelPanel.style.display = 'none';
+        visualMatcher.setManualBoost(0);
+
+        // 3. Reload current clue reference photo
+        if (this.currentClue && this.currentClue.photoUrl) {
+          visualMatcher.loadReferenceImage(this.currentClue.photoUrl);
+        }
+
+        // 4. Reset 3D excavation scene
+        if (this.arScene) {
+          this.arScene.resetDigState();
+        }
+
+        soundFX.stopVisualBeep();
+
+        setTimeout(() => {
+          btnResetCamera.classList.remove('rotating');
+          btnResetCamera.innerHTML = `<span class="reset-icon">🔄</span><span>Reset Camera & Sensors</span>`;
+          this.showToast(cameraOk ? "✓ Camera & Sensors Calibrated!" : "✓ Sensors Reset & Calibrated");
+        }, 300);
+      });
+    }
+
+    // Excavation Digging
     const handleDig = () => {
       if (!this.isLockedOn) return;
 
@@ -316,21 +369,21 @@ export class CameraHuntView {
       const result = this.arScene.performDig();
       const pct = Math.round(result.progress * 100);
 
-      digBar.style.width = `${pct}%`;
-      digPct.textContent = `${pct}%`;
+      this.domElements.digBar.style.width = `${pct}%`;
+      this.domElements.digPct.textContent = `${pct}%`;
 
       if (result.completed) {
         soundFX.stopVisualBeep();
         soundFX.playChestUnlock();
 
         if (window.confetti) {
-          window.confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+          window.confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
         }
 
         setTimeout(() => {
-          rewardItem.textContent = this.currentClue.treasureName || "Ancient Relic";
-          rewardMsg.textContent = this.currentClue.secretMessage || "You spotted the landmark and dug up the treasure!";
-          rewardModal.style.display = 'flex';
+          this.domElements.rewardItem.textContent = this.currentClue.treasureName || "Ancient Relic";
+          this.domElements.rewardMsg.textContent = this.currentClue.secretMessage || "You spotted the landmark and dug up the treasure!";
+          this.domElements.rewardModal.style.display = 'flex';
         }, 1100);
       }
     };
@@ -342,20 +395,86 @@ export class CameraHuntView {
       }
     });
 
+    // Smooth Continuous Riddle Progression (Zero Camera Restart!)
     rewardNextBtn.addEventListener('click', () => {
       soundFX.playClick();
-      gameState.advanceToNextClue();
-      this.unmount();
-
-      if (gameState.isHuntComplete()) {
-        if (this.onVictory) this.onVictory();
-      } else {
-        this.mount();
-      }
+      this.advanceToNextRiddle();
     });
   }
 
-  startFrameAnalysisLoop(videoEl, elements) {
+  // Smooth continuous transition to the next riddle without freezing camera
+  advanceToNextRiddle() {
+    gameState.advanceToNextClue();
+
+    if (gameState.isHuntComplete()) {
+      this.unmount();
+      if (this.onVictory) this.onVictory();
+      return;
+    }
+
+    this.currentClue = gameState.getCurrentClue();
+    const totalClues = gameState.hunt.clues.length;
+
+    // 1. Hide Reward Modal
+    this.domElements.rewardModal.style.display = 'none';
+
+    // 2. Reset excavation states smoothly without destroying Three.js
+    this.isLockedOn = false;
+    this.domElements.canvasEl.style.opacity = '0.15';
+    this.domElements.shovelPanel.style.display = 'none';
+    this.domElements.digBar.style.width = '0%';
+    this.domElements.digPct.textContent = '0%';
+    if (this.arScene) {
+      this.arScene.resetDigState();
+    }
+
+    // 3. Reset matcher & load new reference photo in background
+    visualMatcher.setManualBoost(0);
+    if (this.currentClue && this.currentClue.photoUrl) {
+      visualMatcher.loadReferenceImage(this.currentClue.photoUrl);
+    }
+
+    // 4. Update HUD Riddle text & Hint
+    this.domElements.clueCounterBadge.textContent = `Riddle ${this.currentClue.number} of ${totalClues}`;
+    this.domElements.riddleTextDisplay.textContent = `"${this.currentClue.riddle}"`;
+    this.domElements.hintTextBox.textContent = this.currentClue.hint || '';
+    this.domElements.hintTextBox.style.display = 'none';
+
+    if (this.domElements.btnToggleHint) {
+      this.domElements.btnToggleHint.style.display = this.currentClue.hint ? 'inline-block' : 'none';
+      this.domElements.btnToggleHint.textContent = '💡 Show Hint';
+    }
+
+    // 5. Reset Reticle & Signal
+    this.domElements.reticleBox.className = 'optical-reticle-box';
+    this.domElements.reticleBadge.textContent = 'SCANNING ENVIRONMENT...';
+    this.domElements.signalStateText.textContent = 'SEARCHING BY RIDDLE';
+    this.domElements.signalStateText.style.color = '#94a3b8';
+    this.domElements.signalIcon.textContent = '📡';
+    this.domElements.signalPctText.textContent = '0%';
+    this.domElements.signalMeterFill.style.width = '8%';
+    soundFX.stopVisualBeep();
+
+    // 6. Ensure camera stream remains live and active
+    this.cameraManager.ensureRunning();
+
+    // 7. Toast feedback
+    this.showToast(`Riddle ${this.currentClue.number} Activated!`);
+  }
+
+  showToast(message) {
+    if (this.domElements.liveToast && this.domElements.liveToastText) {
+      this.domElements.liveToastText.textContent = message;
+      this.domElements.liveToast.style.display = 'flex';
+      setTimeout(() => {
+        if (this.domElements.liveToast) {
+          this.domElements.liveToast.style.display = 'none';
+        }
+      }, 3500);
+    }
+  }
+
+  startFrameAnalysisLoop(videoEl) {
     this.stopFrameAnalysisLoop();
 
     this.scanInterval = setInterval(() => {
@@ -363,8 +482,8 @@ export class CameraHuntView {
 
       const score = visualMatcher.compareLiveFrame(videoEl);
 
-      elements.signalPctText.textContent = `${score}%`;
-      elements.signalMeterFill.style.width = `${Math.max(8, score)}%`;
+      this.domElements.signalPctText.textContent = `${score}%`;
+      this.domElements.signalMeterFill.style.width = `${Math.max(8, score)}%`;
 
       soundFX.updateVisualBeep(score);
 
@@ -372,36 +491,36 @@ export class CameraHuntView {
         this.isLockedOn = true;
         soundFX.playMatchSuccess();
 
-        elements.reticleBox.className = 'optical-reticle-box reticle-locked';
-        elements.reticleBadge.textContent = '🎯 LANDMARK CONFIRMED! LOCK ACQUIRED!';
-        elements.signalStateText.textContent = 'LANDMARK LOCKED! DIG IN AR!';
-        elements.signalStateText.style.color = '#34d399';
-        elements.signalIcon.textContent = '✨';
-        elements.canvasEl.style.opacity = '1.0';
-        elements.shovelPanel.style.display = 'flex';
+        this.domElements.reticleBox.className = 'optical-reticle-box reticle-locked';
+        this.domElements.reticleBadge.textContent = '🎯 LANDMARK CONFIRMED! LOCK ACQUIRED!';
+        this.domElements.signalStateText.textContent = 'LANDMARK LOCKED! DIG IN AR!';
+        this.domElements.signalStateText.style.color = '#34d399';
+        this.domElements.signalIcon.textContent = '✨';
+        this.domElements.canvasEl.style.opacity = '1.0';
+        this.domElements.shovelPanel.style.display = 'flex';
 
         if (navigator.vibrate) navigator.vibrate([60, 40, 100]);
       } else if (score >= 60) {
-        elements.reticleBox.className = 'optical-reticle-box reticle-hot';
-        elements.reticleBadge.textContent = `🔥 TARGET IN SIGHT (${score}%)`;
-        elements.signalStateText.textContent = 'HOT! HOLD STEADY ON TARGET!';
-        elements.signalStateText.style.color = '#f59e0b';
-        elements.signalIcon.textContent = '🔥';
-        elements.canvasEl.style.opacity = '0.4';
+        this.domElements.reticleBox.className = 'optical-reticle-box reticle-hot';
+        this.domElements.reticleBadge.textContent = `🔥 TARGET IN SIGHT (${score}%)`;
+        this.domElements.signalStateText.textContent = 'HOT! HOLD STEADY ON TARGET!';
+        this.domElements.signalStateText.style.color = '#f59e0b';
+        this.domElements.signalIcon.textContent = '🔥';
+        this.domElements.canvasEl.style.opacity = '0.4';
       } else if (score >= 35) {
-        elements.reticleBox.className = 'optical-reticle-box reticle-warm';
-        elements.reticleBadge.textContent = `📡 FAINT SIGNAL DETECTED (${score}%)`;
-        elements.signalStateText.textContent = 'DETECTOR BEEPING...';
-        elements.signalStateText.style.color = '#06b6d4';
-        elements.signalIcon.textContent = '⚡';
-        elements.canvasEl.style.opacity = '0.2';
+        this.domElements.reticleBox.className = 'optical-reticle-box reticle-warm';
+        this.domElements.reticleBadge.textContent = `📡 FAINT SIGNAL DETECTED (${score}%)`;
+        this.domElements.signalStateText.textContent = 'DETECTOR BEEPING...';
+        this.domElements.signalStateText.style.color = '#06b6d4';
+        this.domElements.signalIcon.textContent = '⚡';
+        this.domElements.canvasEl.style.opacity = '0.2';
       } else {
-        elements.reticleBox.className = 'optical-reticle-box';
-        elements.reticleBadge.textContent = 'SCANNING ENVIRONMENT...';
-        elements.signalStateText.textContent = 'SEARCHING BY RIDDLE';
-        elements.signalStateText.style.color = '#94a3b8';
-        elements.signalIcon.textContent = '📡';
-        elements.canvasEl.style.opacity = '0.1';
+        this.domElements.reticleBox.className = 'optical-reticle-box';
+        this.domElements.reticleBadge.textContent = 'SCANNING ENVIRONMENT...';
+        this.domElements.signalStateText.textContent = 'SEARCHING BY RIDDLE';
+        this.domElements.signalStateText.style.color = '#94a3b8';
+        this.domElements.signalIcon.textContent = '📡';
+        this.domElements.canvasEl.style.opacity = '0.1';
       }
     }, 150);
   }
@@ -420,7 +539,7 @@ export class CameraHuntView {
       this.unsubscribeHunt = null;
     }
     if (this.cameraManager) {
-      this.cameraManager.stop();
+      this.cameraManager.destroy();
       this.cameraManager = null;
     }
     if (this.arScene) {
