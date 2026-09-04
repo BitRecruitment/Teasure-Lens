@@ -300,15 +300,17 @@ body {
 
 .riddle-tactical-card {
   flex: 1;
-  background: rgba(15, 22, 38, 0.92);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-card);
+  background: rgba(10, 15, 26, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.32);
   border-radius: var(--radius-card);
-  padding: 12px 14px;
-  box-shadow: var(--shadow-card);
+  padding: 13px 16px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.75), 0 0 20px rgba(245, 158, 11, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  transition: border-color 0.25s ease;
 }
 
 .riddle-top-meta {
@@ -362,11 +364,12 @@ body {
 }
 
 .riddle-text-sm {
-  font-size: 0.92rem;
+  font-size: 0.98rem;
   font-weight: 500;
-  color: #fff;
-  line-height: 1.4;
-  font-style: italic;
+  color: #f8fafc;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .landmark-tag-inline {
@@ -688,11 +691,136 @@ body {
   transform: scale(0.9);
 }
 
-.camera-test-controls {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
+/* Primary Scan Action Trigger */
+.scan-action-wrapper {
+  align-self: center;
+  width: 100%;
+  max-width: 290px;
+  text-align: center;
+  margin-top: -12px;
+  z-index: 20;
 }
+
+.btn-scan-action {
+  width: 100%;
+  padding: 13px 20px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  border: none;
+  border-radius: 32px;
+  box-shadow: 0 4px 25px rgba(245, 158, 11, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-scan-action:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 30px rgba(245, 158, 11, 0.7);
+}
+
+.btn-scan-action:active {
+  transform: scale(0.96);
+}
+
+.btn-scan-action.scanning {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 4px 25px rgba(2, 132, 199, 0.55);
+}
+
+.scan-btn-icon {
+  font-size: 1.15rem;
+  display: inline-block;
+}
+
+.scan-btn-icon.spin, .reset-icon.spin {
+  animation: spinSlow 1s linear infinite;
+}
+
+@keyframes spinSlow {
+  100% { transform: rotate(360deg); }
+}
+
+/* Dedicated Lower Reset Button (Camera Stalls / Sensor Calibrations) */
+.lower-reset-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.btn-lower-reset {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #94a3b8;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-lower-reset:hover {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.btn-lower-reset:active {
+  transform: scale(0.95);
+  color: #fff;
+  border-color: #38bdf8;
+}
+
+.btn-lower-reset.rotating .reset-icon {
+  animation: spinSlow 0.8s linear infinite;
+}
+
+.reset-icon {
+  font-size: 0.95rem;
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+
+/* Riddle Card Footer & Sensitivity Pill */
+.riddle-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sens-pill {
+  color: #38bdf8 !important;
+  background: rgba(6, 182, 212, 0.12) !important;
+  padding: 3px 8px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(6, 182, 212, 0.25) !important;
+  font-size: 0.72rem !important;
+}
+
 
 /* Live Broadcast Status Banner */
 .publish-status-banner {
