@@ -20,10 +20,31 @@ export class CameraHuntView {
   }
 
   async mount() {
+    if (gameState.isHuntComplete() && gameState.unlockedTreasures && gameState.unlockedTreasures.length > 0) {
+      if (this.onVictory) {
+        this.onVictory();
+        return;
+      }
+    }
+
     this.currentClue = gameState.getCurrentClue();
-    const totalClues = gameState.hunt.clues.length;
+    if (!this.currentClue && gameState.hunt && gameState.hunt.clues && gameState.hunt.clues.length > 0) {
+      gameState.currentClueIndex = 0;
+      this.currentClue = gameState.getCurrentClue();
+    }
+
+    if (!this.currentClue) {
+      this.currentClue = {
+        number: 1,
+        riddle: "Waiting for landmarks... Admin can add riddles in the Admin panel!",
+        hint: ""
+      };
+    }
+
+    const totalClues = (gameState.hunt && gameState.hunt.clues) ? Math.max(1, gameState.hunt.clues.length) : 1;
     const hasPhoto = Boolean(this.currentClue && this.currentClue.photoUrl);
     const hasName = Boolean(gameState.studentName);
+
 
     // AI Vision loads reference photo silently in background
     if (hasPhoto) {
