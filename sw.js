@@ -1,12 +1,12 @@
 // Service Worker for TreasureLens AR PWA
 const CACHE_NAME = 'treasurelens-ai-cache-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  './',
+  './index.html',
+  './style.css',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
