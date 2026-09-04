@@ -22,6 +22,16 @@ class App {
     await gameState.fetchLiveHunt();
     gameState.startLiveSync();
 
+    gameState.onHuntChanged((newCount) => {
+      if (this.currentViewName === 'victory' && !gameState.isHuntComplete()) {
+        const playBtn = document.getElementById('nav-play-btn');
+        const adminBtn = document.getElementById('nav-create-btn');
+        if (playBtn) playBtn.classList.add('active');
+        if (adminBtn) adminBtn.classList.remove('active');
+        this.switchView('hunt');
+      }
+    });
+
     if (gameState.isHuntComplete()) {
       this.switchView('victory');
     } else {
