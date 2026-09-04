@@ -1,5 +1,5 @@
 // Service Worker for TreasureLens AR PWA
-const CACHE_NAME = 'treasurelens-ai-cache-v2';
+const CACHE_NAME = 'treasurelens-ai-cache-v4';
 const ASSETS = [
   './',
   './index.html',
