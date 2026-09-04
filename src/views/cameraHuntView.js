@@ -330,8 +330,11 @@ export class CameraHuntView {
 
         if (res.success || res.score >= 50) {
           visualMatcher.setManualBoost(95);
+          this.domElements.reticleBadge.textContent = res.deepAiScore > 0
+            ? `🎯 AI NEURAL MATCH CONFIRMED (${res.score}%)`
+            : `🎯 LANDMARK CONFIRMED (${res.score}%)`;
         } else {
-          this.domElements.reticleBadge.textContent = `⚠️ Match ${res.score}% - Aim closer to the landmark!`;
+          this.domElements.reticleBadge.textContent = `⚠️ Match ${res.score}% - Frame the landmark in the center box!`;
           if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
           setTimeout(() => {
             if (!this.isLockedOn) {
