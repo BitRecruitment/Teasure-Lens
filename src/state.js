@@ -1,5 +1,9 @@
 // Game State, Admin Auth, Live Central Server Sync & Admin-Only Private Leaderboard
 
+const API_BASE = (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
+  ? 'https://teasure-lens.onrender.com'
+  : '';
+
 const SAMPLE_TREE_PHOTO = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
   <defs>
@@ -179,7 +183,7 @@ class GameState {
     const total = this.hunt && this.hunt.clues ? this.hunt.clues.length : 1;
 
     try {
-      await fetch('/api/progress', {
+      await fetch(`${API_BASE}/api/progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -196,7 +200,7 @@ class GameState {
 
   async fetchLiveHunt() {
     try {
-      let res = await fetch('/api/hunt', { cache: 'no-store' });
+      let res = await fetch(`${API_BASE}/api/hunt`, { cache: 'no-store' });
       if (!res.ok) {
         res = await fetch('./hunt_data.json', { cache: 'no-store' });
       }
@@ -236,7 +240,7 @@ class GameState {
     }
 
     try {
-      const res = await fetch('/api/leaderboard', {
+      const res = await fetch(`${API_BASE}/api/leaderboard`, {
         headers: {
           'X-Admin-Password': this.adminPassword
         },
@@ -253,7 +257,7 @@ class GameState {
   async resetLeaderboard() {
     if (!this.isAdminAuthenticated) return false;
     try {
-      const res = await fetch('/api/leaderboard/reset', {
+      const res = await fetch(`${API_BASE}/api/leaderboard/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: this.adminPassword })
@@ -269,7 +273,7 @@ class GameState {
     this.notify();
 
     try {
-      const res = await fetch('/api/hunt', {
+      const res = await fetch(`${API_BASE}/api/hunt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
