@@ -377,12 +377,43 @@ export class ARDigScene {
         this.scene.remove(p);
         p.geometry.dispose();
         p.material.dispose();
-        this.particles.splice(i, 1);
-      }
-    }
-
     this.renderer.render(this.scene, this.camera);
   }
+
+  // Smoothly reset 3D excavation state for the next riddle without tearing down WebGL
+  resetDigState() {
+    this.digCount = 0;
+    this.isOpened = false;
+
+    // Reset chest lid and position
+    if (this.chestLid) {
+      this.chestLid.rotation.x = 0;
+    }
+    if (this.chestGroup) {
+      this.chestGroup.position.y = -0.6;
+    }
+
+    // Reset inner glow light
+    if (this.innerLight) {
+      this.innerLight.intensity = 0;
+    }
+
+    // Restore dirt mound
+    if (this.dirtMound) {
+      this.dirtMound.scale.set(1, 1, 1);
+      this.dirtMound.visible = true;
+    }
+
+    // Clean up remaining particles
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      this.scene.remove(p);
+      if (p.geometry) p.geometry.dispose();
+      if (p.material) p.material.dispose();
+    }
+    this.particles = [];
+  }
+
 
   destroy() {
     if (this.animId) {
