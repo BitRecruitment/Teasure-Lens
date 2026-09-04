@@ -377,6 +377,10 @@ export class ARDigScene {
         this.scene.remove(p);
         p.geometry.dispose();
         p.material.dispose();
+        this.particles.splice(i, 1);
+      }
+    }
+
     this.renderer.render(this.scene, this.camera);
   }
 
